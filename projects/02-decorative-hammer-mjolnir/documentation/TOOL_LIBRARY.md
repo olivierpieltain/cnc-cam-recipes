@@ -71,21 +71,43 @@ wider-line decorations.
 
 ## Tools we'll actually use on project 02 — short list
 
-| ID | Tool | Material | Operation |
-|---|---|---|---|
-| **T1** | 3.175 mm × 22 mm 2F flat | Oak | Handle outer profile + shaft / tenon contour |
-| **T2** | 3.175 mm × 22 mm 2F ball | Oak | R6 long-edge fillets, R5 pommel, Odin bust 3D finish |
-| **T3** | 60° / 0.1 mm V-bit (wood) | Oak | All handle engravings |
-| **T4** | 1.5 mm × 6 mm 2F flat | Oak | Wedge kerf (final dimension), small-radius corners |
-| **T5** | 3 mm TiN drill | Oak | Strap hole Ø6 — drill in 2× from each side at Ø3, then bore out to Ø6 with T1 |
-| **T6** | 3.175 mm × 12 mm spiral O 1F (metal) | 7075 alu | Head outer profile + eye pocket roughing |
-| **T7** | 3.175 mm × 42 mm spiral O 1F (metal, long) | 7075 alu | Eye through-cut (deep reach, project 01 tool) |
-| **T8** | 90° chamfer bit | 7075 alu | 5 mm head chamfer |
-| **T9** | 30° / 0.2 mm V-bit (metal) | 7075 alu | All head engravings |
-| **T10** | 3.175 mm × 22 mm 2F ball | 7075 alu | Optional fine finish on chamfer band edges |
+Mapped to specific entries in the **Makera Carvera Tools v1.4.0**
+library (installed at `%APPDATA%/Autodesk/CAM360/libraries/Local/Makera Carvera Tools v1.4.0/`):
 
-T7 was the project 01 roughing tool — well-characterised on this machine,
-known feeds-and-speeds. We get to reuse what's already trusted.
+| ID | Library | Tool Name | D × Flute | Material | Operation |
+|---|---|---|---|---|---|
+| **T1** | O Flute Bits | `Spiral O 3.175*22mm` | 3.175 × 22 | Oak | Handle profile, shoulder, tenon contour |
+| **T2** | Ball Endmills | `2 Flute Ball Nose 3.175*22` | 3.175 × 22 | Oak | R6 fillets, R5 pommel, Odin 3D finish |
+| **T3** | Engraving Bits | `Single Flute Engraving Metal 60 deg*.1mm` | 3.175 × 8 (60° tip 0.1) | Oak | All handle engravings |
+| **T4** | O Flute Bits | `Spiral O Metal 1.5*6mm` | 1.5 × 6 | Oak | Wedge kerf — final 1.5 mm width |
+| **T5** | Drill Bits | `3*12mm Drill` | 3 × 12 | Oak | Strap hole Ø3 pilot (2× from each side) |
+| **T6** | O Flute Bits | `Spiral O Metal 3.175*12mm` | 3.175 × 12 | 7075 alu | Head profile, eye pocket rough |
+| **T7** | O Flute Bits | `Spiral O 3.175*42mm` | 3.175 × 42 | 7075 alu | Eye through-cut (project 01 tool) |
+| **T8** | Other Tools | `Chamfering Bit - 1/8" Shank` | 3.175 × 3 (90°) | 7075 alu | 5 mm head chamfer |
+| **T9** | Engraving Bits | `Single Flute Engraving Metal 30 deg*.2mm` | 3.175 × 9 (30° tip 0.2) | 7075 alu | Head engravings |
+
+**Important:** the metal-spec engraving bit (T3) is being used in oak.
+Functionally fine — tip geometry is what matters for V-engraving, and
+single-flute O-geometry handles wood chips well. The metal coating is
+over-spec but doesn't hurt.
+
+**T7 (Spiral O 3.175*42mm)** was the roughing tool used in project 01
+— same spindle, same well-characterised feeds-and-speeds. Reusing
+trusted parameters.
+
+### How Fusion sees this library
+
+Fusion's API URL pattern works:
+
+```
+toollibraryroot://Local/Makera Carvera Tools v1.4.0/<filename>.json
+```
+
+There's a known issue where `Local.json` (the index file Fusion expects
+at `libraries/Local.json`) is missing — only the subfolder
+`libraries/Local/` exists. The browser tree won't auto-populate, but
+direct URL access reads each library file individually. We assign tools
+in CAM operations by URL.
 
 ## Notes
 
