@@ -1,0 +1,58 @@
+{
+  "name": "pear-2mm-ball-finishing-detail-rest",
+  "version": 1,
+  "machine_floor": {
+    "min_envelope_mm": [360, 240, 140],
+    "min_spindle_W_continuous": 200,
+    "min_spindle_RPM": 15000,
+    "rigidity": "small-format desktop CNC (Carvera Air-class or better)"
+  },
+  "material": "pear (medium hardwood, density ~700 kg/m^3, Kc ~5 N/mm^2). Same recipe is reasonable for cherry, walnut, beech.",
+  "tool": {
+    "diameter_mm": 2.0,
+    "type": "ball nose endmill (2-flute)",
+    "flutes": 2,
+    "flute_length_mm": 17,
+    "shank_diameter_mm": 3.175,
+    "geometry_notes": "17 mm flute on a 1/8\" shank — common reduced-shank ball nose. Long-flute relative to diameter (8.5x), so it deflects under load. Recipe parameters below are chosen to keep load low and avoid chatter on the small spindle. Reach is 17 mm into the cut; the previous Ø3.175 main pass handles depth beyond that."
+  },
+  "operation": "parallel_finishing_rest",
+  "intended_role": "Detail rest pass, after a Ø3.175 ball nose main 3D finish. Cleans corners and small features the bigger ball couldn't reach.",
+  "params": {
+    "tolerance_mm": 0.02,
+    "stepover_mm": 0.08,
+    "maximumStepdown_mm": 0.4,
+    "stockToLeave_mm": 0,
+    "useStockToLeave": false,
+    "useRestMachining": true,
+    "rest_source_hint": "previous parallel pass with Ø3.175 ball",
+    "boundaryMode": "silhouette",
+    "direction": "both ways",
+    "topHeight_offset_mm": 0,
+    "bottomHeight_offset_mm": 0,
+    "tool_feedCutting_mm_min": 280,
+    "tool_feedPlunge_mm_min": 45,
+    "tool_spindleSpeed_RPM": 14000
+  },
+  "reasoning": {
+    "tolerance_mm": "0.02 mm — finishing-grade. With a 2 mm ball, the tool itself can hold this comfortably; coarser tolerances start showing as visible faceting on the surface.",
+    "stepover_mm": "0.08 mm. Theoretical scallop on a Ø2.0 ball at 0.08 stepover ≈ 0.0008 mm = 0.8 µm. Effectively invisible. Going tighter just inflates cycle time.",
+    "maximumStepdown_mm": "0.4 mm. Limits how deep any single Z-pass goes — chosen specifically for the 17 mm flute / small diameter combo on a 200 W spindle. Dropping from a 'reasonable' 0.5 mm to 0.4 mm trades ~25% cycle time for noticeably less chatter risk on long milling.",
+    "useRestMachining": "true. The whole point of this op is to clean what the bigger ball couldn't reach. Without rest machining you re-cut the entire surface unnecessarily.",
+    "boundaryMode": "silhouette. Confines the cut to within the part's silhouette — no air-cutting outside the relief.",
+    "direction": "both ways. Climb-only would give marginally better surface but ~2x cycle time; not worth it for a rest pass at 0.08 stepover. If you see directional artifacts in the surface, switch to climb.",
+    "tool_feedCutting_mm_min": "280 mm/min @ 14000 RPM × 2 flutes = 0.010 mm/tooth. Bottom of pear's window (0.01–0.02) for a Ø2 mm ball — chosen for surface quality and chatter avoidance over throughput. Bump to 350 mm/min if your machine handles it cleanly.",
+    "tool_spindleSpeed_RPM": "14000. Higher than the roughing pass — small ball nose needs higher RPM for chip evacuation and surface finish. Still under the Carvera Air's 15 000 ceiling."
+  },
+  "verification": {
+    "MRR_mm3_min": 9,
+    "spindle_power_required_W": 1,
+    "spindle_power_budget_W": 140,
+    "chipload_mm_per_tooth": 0.010
+  },
+  "see_also": [
+    "recipes/pear-3175-ball-finishing-main.json (the main 3D finish that runs first)",
+    "docs/feeds-and-speeds.md",
+    "docs/safety-rules.md"
+  ]
+}

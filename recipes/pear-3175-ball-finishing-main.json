@@ -1,0 +1,56 @@
+{
+  "name": "pear-3175-ball-finishing-main",
+  "version": 1,
+  "machine_floor": {
+    "min_envelope_mm": [360, 240, 140],
+    "min_spindle_W_continuous": 200,
+    "min_spindle_RPM": 15000,
+    "rigidity": "small-format desktop CNC (Carvera Air-class or better)"
+  },
+  "material": "pear (medium hardwood). Also fine on cherry, walnut, beech, similar.",
+  "tool": {
+    "diameter_mm": 3.175,
+    "type": "ball nose endmill (2-flute)",
+    "flutes": 2,
+    "flute_length_mm": 22,
+    "overall_length_mm": 38,
+    "shank_diameter_mm": 3.175,
+    "geometry_notes": "Standard 1/8\" 2-flute ball with 22 mm flute. Reach is limited to 22 mm into the cut, but the same diameter shank means the tool can go deeper if the surrounding material is wide enough."
+  },
+  "operation": "parallel_finishing_main",
+  "intended_role": "Main 3D finishing pass on a relief surface, after roughing + flat-floor rework. Covers the full silhouette in one shot at moderate stepover.",
+  "params": {
+    "tolerance_mm": 0.03,
+    "stepover_mm": 0.25,
+    "maximumStepdown_mm": 1.0,
+    "stockToLeave_mm": 0.1,
+    "useStockToLeave": false,
+    "useRestMachining": false,
+    "boundaryMode": "silhouette",
+    "direction": "both ways",
+    "topHeight_offset_mm": 0,
+    "bottomHeight_offset_mm": 0,
+    "tool_feedCutting_mm_min": 360,
+    "tool_feedPlunge_mm_min": 55,
+    "tool_spindleSpeed_RPM": 13000
+  },
+  "reasoning": {
+    "tolerance_mm": "0.03 mm — finishing-grade. Tighter than the 0.1 mm roughing tolerance but coarser than a detail rest pass; still ~0.5 µm of faceting at the typical scallop scale, invisible to the naked eye.",
+    "stepover_mm": "0.25 mm gives a theoretical scallop of ~0.005 mm (5 µm) on a Ø3.175 ball — already finer than wood grain. Going tighter is mostly time without practical benefit; the rest pass with the smaller ball will pick up real defects.",
+    "useRestMachining": "false. This is the FIRST finishing op — there is no previous source to take rest from.",
+    "boundaryMode": "silhouette — confines cuts to within the part outline.",
+    "direction": "both ways. Standard for this stepover/tolerance combo.",
+    "tool_feedCutting_mm_min": "360 mm/min @ 13000 RPM × 2 flutes = 0.0138 mm/tooth — within pear's 0.01–0.03 window for ball noses. Slightly slower than the roughing recipe because surface quality matters more than throughput here.",
+    "tool_spindleSpeed_RPM": "13000. Same as roughing for consistency."
+  },
+  "verification": {
+    "MRR_mm3_min": 90,
+    "spindle_power_required_W": 11,
+    "spindle_power_budget_W": 140,
+    "chipload_mm_per_tooth": 0.0138
+  },
+  "see_also": [
+    "recipes/pear-2mm-ball-finishing-detail-rest.json (the rest pass that runs after this)",
+    "docs/feeds-and-speeds.md"
+  ]
+}
