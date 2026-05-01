@@ -78,7 +78,7 @@ Carvera Air-class capability**:
 
 | | Project | Material | Stock | Tools | What's interesting |
 |---|---|---|---|---|---|
-| 🪵 | [01 — Relief in pear, 150×150×45](projects/01-relief-pear-150x150x45/) | medium hardwood | 150×150×45 mm pre-faced from 50 mm raw | T1 flat 3.175×42 · T2 ball 3.175×22 · T3 ball 2.0×12 · V-bit (carving) | three-slab adaptive roughing + 3-pass finishing (main / detail rest / pencil) |
+| 🪵 | [01 — Relief in pear, 150×150×45](projects/01-relief-pear-150x150x45/) | medium hardwood | 150×150×45 mm pre-faced from 50 mm raw | T1 flat 3.175×42 · T2 ball 3.175×22 · T3 ball 2.0×17 · V-bit (carving) | three-slab adaptive roughing + 3-pass finishing (main / detail rest / pencil) |
 
 ## What this repo is *not*
 

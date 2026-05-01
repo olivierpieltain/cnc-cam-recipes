@@ -71,11 +71,11 @@ collet without changes.
 - **T2 Ø3.175 × 22 mm ball** — the standard "main 3D finish" bit for
   any 1/8"-class CNC. Big enough to cover a lot of area at moderate
   stepover; small enough to follow most relief features.
-- **T3 Ø2.0 × 12 mm ball (NOT × 17 mm)** — there's a Ø2.0 × 17 mm
-  available too, but for a long milling session on a small spindle the
-  shorter flute is far stiffer. Less deflection = no chatter = better
-  surface and fewer broken bits. The 12 mm reach limit is acceptable
-  because most fine detail in a relief is in the upper layers.
+- **T3 Ø2.0 × 17 mm 2-flute ball nose** — long-flute relative to
+  diameter (8.5x), so it deflects under load. We compensate with
+  conservative parameters (0.4 mm stepdown, 280 mm/min feed) to keep
+  load low on the 200 W spindle and avoid chatter. 17 mm flute reaches
+  most of the relief depth comfortably.
 - **V-bit (optional)** — 60° × 0.1 mm is the default for pencil; switch
   to 30° × 0.2 mm only if your relief has very tight internal corners
   (more fragile tip, but reaches sharper angles).
@@ -196,7 +196,7 @@ python tools/validate_cnc.py nc/01_T1_ROUGHING_3175x42.cnc \
     --max-depth 35 --bounds 0,0,150,150 --high-feed 3000
 python tools/validate_cnc.py nc/03_T2_FINISH_BALL_3175x22.cnc \
     --max-depth 35 --bounds 0,0,150,150 --high-feed 3000
-python tools/validate_cnc.py nc/04_T3_DETAIL_REST_BALL_2x12.cnc \
+python tools/validate_cnc.py nc/04_T3_DETAIL_REST_BALL_2x17.cnc \
     --max-depth 35 --bounds 0,0,150,150 --high-feed 3000
 ```
 
