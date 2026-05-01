@@ -3,6 +3,51 @@
 Notes I wish I'd had before starting. None of these are deal-breakers,
 but each cost time the first time around.
 
+## "Conservative" is not the same as "right" — under-feeding doubles cycle time
+
+The first version of the roughing recipe shipped with `optimalLoad =
+0.5 mm` (16 % of tool diameter) and `tool_feedCutting = 430 mm/min`.
+The thinking was "Carvera Air's small spindle, long-flute tool, better
+to be safe." The result: an estimated **35-hour roughing pass**, which
+the operator only noticed after the job had started.
+
+The numbers were wrong in two compounding ways:
+
+1. **`optimalLoad` 0.5 mm = 16 % of D.** Adaptive clearing's design
+   point in wood is **20–30 % of D**. At 16 % the tool is making
+   chips so thin they don't break — it rubs and burnishes more than it
+   cuts. Bumping to **0.8 mm = 25 % of D** lands in the recipe's
+   intended window.
+2. **`tool_feedCutting` 430 mm/min.** With Ø3.175 / 2 flutes / 13 000
+   RPM that's 0.0165 mm/tooth — the *bottom* of pear's chipload window
+   (0.025–0.05 mm/tooth). Bumping to **600 mm/min** gives 0.023
+   mm/tooth, mid-window. Same tool, same engagement, just feeding
+   correctly.
+
+Power check at the corrected numbers: MRR ≈ 2.0 × 0.8 × 600 = 960
+mm³/min ≈ 16 mm³/s. P ≈ 16 × 5 / 0.7 ≈ **115 W** — under the 140 W
+spindle budget. Comfortable.
+
+**Net effect:** the corrected recipe roughs the same volume in roughly
+**12 hours instead of 35.** Same machine, same tool, same stock.
+
+> Why this matters beyond cycle time: a tool that's rubbing instead of
+> cutting heats up, dulls fast, and makes worse surface finish. Slow
+> isn't the same as gentle.
+
+The recipe in [`recipes/pear-3175-flat-roughing-adaptive.json`](../../recipes/pear-3175-flat-roughing-adaptive.json)
+now ships with the corrected numbers. The reasoning block in the
+recipe carries inline notes about what the earlier version had so the
+mistake isn't silently repeated.
+
+**Operator workaround on the running job:** the Carvera's feed-override
+slider scales feeds in real time. Setting it to **200 %** doubles 430
+to 860 mm/min, which is *higher* than the corrected 600 but still
+inside pear's chipload window (0.033 mm/tooth). On a job that's
+already in flight with the slow .cnc, that's the only lever — and it
+roughly halves the remaining time. Reset to 100 % before any
+finishing pass.
+
 ## Adaptive against a mesh body is *much* slower than against BRep
 
 The relief in this project is a triangle mesh (STL). Adaptive evaluates
