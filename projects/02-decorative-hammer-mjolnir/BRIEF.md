@@ -38,13 +38,17 @@ and runic name engraving.
 
 ### Handle (white oak) — modelled
 
-- **Length:** 220 mm (shorter than initial 250 to give 2.2:1 ratio
-  vs. 100 mm head — reads as balanced).
-- **Cross-section:** 25 × 22 mm, all 4 long edges filleted **R6**
-  for an oval feel.
-- **Top — Tenon:** 30 mm long, 24 × 14 mm cross-section. Centered.
-  Z range 190–220 mm. Friction-fits into head's 24 × 14 eye.
-- **Just under tenon — Odin reliefs (×2):** Z range 130–190 mm.
+- **Total length:** 240 mm — 190 mm shaft + 50 mm tenon.
+- **Cross-section:** 25 × 22 mm shaft, all 4 long edges filleted **R6**
+  for an oval feel. **Straight (no curve)** — keeping the geometry
+  CAM-friendly given the milling complexity ahead.
+- **Top — Tenon:** **50 mm long** (full depth of head's eye), 24 × 14 mm
+  cross-section. Centered, Z range 190–240 mm. Friction-fits into
+  head's 24 × 14 eye and reaches flush with the head's top.
+- **Wedge kerf:** 1.5 × 14 × 25 mm slot cut into the top of the tenon.
+  Wood wedge driven from above splits the tenon top, splaying it
+  against the eye walls to lock the head in place.
+- **Just under tenon (under the head) — Odin reliefs (×2):** Z range 130–190 mm.
   - Front face (+Y) and back face (-Y), mirrored copies of the
     same Viking-warrior bust.
   - Source: user-provided `Viking+Bust+100%+248mm` STL, converted to
@@ -67,8 +71,9 @@ and runic name engraving.
 
 - **Friction tenon + Viking wood wedge** (no glue).
 - Tenon enters head's eye from below; head rests on shaft shoulder
-  at Z = 190 mm.
-- Wedge kerf in tenon top: TODO — to be added before CAM.
+  at Z = 190 mm; tenon top is flush with head top at Z = 240 mm.
+- Wedge driven into the kerf at tenon top splits the tenon and splays
+  it against the eye walls — locks permanently after a single tap.
 
 ## Files in `design/`
 
@@ -83,15 +88,18 @@ and runic name engraving.
 
 ## Pending before CAM
 
-1. **Curvature** — gentle bow (deferred per user; will rebuild handle
-   as swept body once everything else is locked).
-2. **Wedge kerf** in handle tenon (~1.5 × 14 × 20 mm slot at top).
-3. **Knotwork patterns** for head decoration — to be sourced /
+1. **Knotwork patterns** for head decoration — to be sourced /
    drawn as 2D sketches for V-bit + drilled-stone pockets.
-4. **Aluminium tooling decision** — is there a Ø6 mm carbide flat
+2. **Aluminium tooling decision** — is there a Ø6 mm carbide flat
    available? Air assist or mist coolant for 7075?
-5. **Carvera bed layout** — dowel pin positions to support the
+3. **Carvera bed layout** — dowel pin positions to support the
    2-sided flip strategy on both pieces.
+
+## Decisions taken (closed)
+
+- **Curvature: cancelled.** User opted to keep the handle straight
+  rather than add complexity. "Let's not overcomplicate things — it
+  will already be challenging to mill this."
 
 ## Hard constraints
 
