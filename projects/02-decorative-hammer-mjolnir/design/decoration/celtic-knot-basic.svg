@@ -1,0 +1,26 @@
+<?xml version="1.0" standalone="no"?>
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" width="800" height="258" viewBox="0 0 800 258">
+<title>One very basic form of Celtic or pseudo-Celtic linear knotwork.  By AnonMoos (public domain)</title>
+<defs><path id="ThreeLoops" d="M241.355,431.355A50,50 0 0,1 170.645,431.355L99.934,360.645A50,50 0 1,0 99.934,431.355L170.645,360.645A50,50 0 0,1 241.355,360.645L312.066,431.355A50,50 0 1,0 312.066,360.645Z"/>
+<path id="FigureEight" d="M170.645,431.355A50,50 0 0,1 99.934,431.355L64.579,396L99.934,360.645A50,50 0 0,1 170.645,360.645L241.355,431.355A50,50 0 0,0 312.066,431.355L347.421,396L312.066,360.645A50,50 0 0,0 241.355,360.645Z"/></defs>
+<g transform="scale(1.92,-1.92)translate(2,-463.2)" stroke-width="20" stroke="#000000" fill="none">
+<use stroke-width="28" stroke="#ffffff" xlink:href="#ThreeLoops"/>
+<use stroke-width="28" stroke="#ffffff" xlink:href="#FigureEight"/>
+<use xlink:href="#ThreeLoops"/>
+<use stroke-width="12" stroke="#ffffff" xlink:href="#ThreeLoops"/>
+<use xlink:href="#FigureEight"/>
+<use stroke-width="12" stroke="#ffffff" xlink:href="#FigureEight"/>
+<path d="M205.127,445.992A50,50 0 0,1 170.645,431.355L155.645,416.355
+M198.5,403.5L213.5,388.5
+M206.873,346.008A50,50 0 0,1 241.355,360.645L256.355,375.645
+M127.79,403.5L142.79,388.5
+M269.21,403.5L284.21,388.5
+M65.451,346.008A50,50 0 0,1 99.934,360.645L114.934,375.645
+M346.549,445.992A50,50 0 0,1 312.066,431.355L297.066,416.355"/>
+<path stroke-width="12" stroke="#ffffff" d="M206,446A50,50 0 0,1 170.645,431.355L155.145,415.855
+M198,404L214,388
+M206,346A50,50 0 0,1 241.355,360.645L256.855,376.145
+M127.29,404L143.29,388
+M268.71,404L284.71,388
+M64.579,346A50,50 0 0,1 99.934,360.645L115.434,376.145
+M347.421,446A50,50 0 0,1 312.066,431.355L296.566,415.855"/></g></svg>

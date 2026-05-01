@@ -26,3 +26,8 @@ desktop.ini
 *.bak
 *.log
 scratch/
+
+# Fusion API workaround artifacts — decimated mesh JSON payloads
+# (regeneratable from the source STLs via stl_to_mesh_json.py;
+# they're large 4+ MB each and only used at Fusion-import time)
+projects/*/design/*.json

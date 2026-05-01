@@ -30,9 +30,9 @@ SRC = Path(
     else r"C:\Users\olivier\AppData\Local\Temp\viking_bust_inspect\obj_1_VIking Head.stl_A.stl"
 )
 OUT_DIR = Path(__file__).parent
-TARGET_W = 25.0   # X (width of handle panel)
+TARGET_W = 28.0   # X (width of handle panel) — matches new shaft X dim
 TARGET_H = 60.0   # Z (height down the handle)
-TARGET_D = 14.0   # Y (depth into handle, post-cap) — dramatic bas-relief
+TARGET_D = 7.0    # Y (depth into handle, post-cap) — flat bas-relief style
 SLICE_DEPTH_MM = 25.0  # take a deep slab of the front so we keep helmet/nose volume
 
 # Override the auto-detected front axis. For this bust the face is on
