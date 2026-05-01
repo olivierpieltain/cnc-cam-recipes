@@ -118,27 +118,131 @@ aluminium with sharp tool), P ≈ 1 W cutting + spindle losses. Well
 under the 200 W ceiling. The bottleneck is thermal/chip management,
 not power — air assist needs to be on.
 
-## Fixturing strategy
+## Carvera Air bed — reference specs
 
-> ⚠ **Bed layout TBD.** The Carvera Air has a T-slot bed; exact
-> spacing + my dowel pin pattern needs to be measured / referenced
-> against arc-reactor's `carvera_job/` precedent (project 01). I'll
-> fill this section once I've inspected the existing first-article
-> setup.
+Confirmed from Makera + community sources (cited in **References** at
+the bottom). The Carvera Air ships with a **CNC-machined MDF bed**
+that has the following layout:
 
-Provisional approach (subject to measurement):
+| Spec | Value |
+|---|---|
+| Working area (3-axis) | **300 × 200 × 130 mm** (X × Y × Z) |
+| Bed surface | MDF, machined; replaceable consumable |
+| Hold-down | Threaded holes (M6 metric / 1/4-20 inch on Saunders option plate) |
+| **Anchor 1** | Lower-left corner of the bed (origin reference) |
+| **Anchor 2** | Centre of the bed (alternate origin reference) |
+| Locating pins | **Ø4 mm** dowel pins in **8 mm standoffs** at each anchor |
+| Optional aluminium plate | Saunders 306 × 222 × 17.8 mm, M6 / 20 mm grid |
 
-- **Common fixture plate:** an MDF/HDPE plate sized to the Carvera
-  bed, drilled with a grid of Ø6 mm dowel-pin holes. Same plate
-  serves both pieces with different pin patterns.
-- **Handle:** clamp the bottom 30 mm of the 300 mm oak stock in the
-  Carvera vise jaws (clamps the fixturing tab). Indexed by 2 dowel
-  pins along the back-side jaw face, the handle stock register against
-  them as it rotates 90° between flips.
-- **Head:** 4 dowel pins forming a 50×50 mm pocket on the fixture plate.
-  The head sits in this pocket, indexed by corner contact. Rotated 90°
-  around X for each long-face flip; flipped end-for-end for the strike
-  faces.
+The Ø4 mm pins at Anchor 1 give a **repeatable lower-left registration
+corner** on the bed itself — pressing the stock against the two pins
+puts it at a known X/Y position relative to the machine origin. This
+is the foundation of the fixturing strategy below.
+
+## Work origin policy — "Anchor 1 + stock corner offset"
+
+The convention adopted across this project (and matching project 01
++ arc-reactor):
+
+- **WCS X0 Y0** = the **lower-left front corner of the stock as
+  mounted**. The stock is registered against Anchor 1's two Ø4 mm
+  pins, so WCS X0 Y0 is at a known offset from machine origin. This
+  is the user's term **"anchor 1"** for the WCS.
+- **WCS Z0** = the **top face of the blank**, set with the XYZ probe
+  (white-side manual probe placed against the front-left corner of the
+  stock; mill positioned in the probe's square; click "Set Origin →
+  Set By XYZ Probe"; tool diameter 3.175 mm).
+- **Posted G-code** uses positive X, Y values that stay inside
+  X = 0..stock_X_mm and Y = 0..stock_Y_mm. The pre-amble emits a
+  safety lift `G53 G0 Z-2` before the first XY rapid (per project 01
+  validation report — emitted automatically by the v1.4.3 community
+  post).
+- **Z-zero is re-set per setup**: each flip presents a new "top of
+  blank" surface. We re-probe at the start of each setup to reset Z0
+  to the new top.
+- **X/Y origin is preserved across flips on the same fixture** as
+  long as the stock returns to the same anchor-1 position (the fixture
+  pins guarantee this).
+
+## Project-02 fixture strategy
+
+### Handle (oak, 300 mm long stock)
+
+- **Mounted vertically — long axis along the bed's Y axis**, with the
+  bottom 30 mm of stock clamped in the Carvera vise jaws (which sit
+  against Anchor 1).
+- The vise jaws give a flat reference plane; the stock's back face
+  registers against the Ø4 mm pins at Anchor 1, and a parallel block
+  along the side gives the X-axis register.
+- **Free length above the vise: 270 mm.** Plenty of clearance for the
+  spindle to reach the part's full Z range.
+- **Indexed flip** rotates the part 90° around its long axis between
+  setups (4 long-face flips). Re-probe Z0 each time. X/Y origin
+  preserved by the vise + pin reference.
+
+```
+                    +Z (machine)
+                     │
+   bed surface   ┌───┴───┐  ← part top (free end, Z=240 of part)
+        ┌────────┤       │
+        │        │       │
+        │ vise   │ part  │
+        │ jaws   │       │
+        │        │       │
+        └────────┤       │
+                 │       │  ← part Z=30 of part
+                 └───────┘  ← bottom of stock (Z=0 of part = WCS Z=stock_top)
+                  ↑        ↑
+                Anchor 1  pin registers
+                pin       (back face of stock)
+```
+
+WCS origin per setup: X = pin-distance, Y = vise-jaw-front-edge,
+Z = top of part (re-probed). The 60 mm fixturing tab below Z=0 of the
+part is **inside the vise**, machined off after the part is finished.
+
+### Head (7075 alu, 100 × 50 × 50 mm stock)
+
+- **Mounted on a 4-pin pocket** indexed off Anchor 1. The head's
+  100 mm dimension along bed X, 50 mm along bed Y. Two pins on the
+  back face (anchor-1 side) and two on the side establish a unique
+  corner.
+- **Indexed flip** rotates the head 90° around either its X or Y axis
+  per setup. Pins are repositioned for the two strike-face setups
+  (50 × 50 footprint) vs the 4 long-face setups (100 × 50 footprint).
+- Side-clamp toe-clamps on the **non-machining face** for each setup
+  — never on a face being machined or about to be machined.
+
+```
+   bed surface (top view, looking down -Z)
+   ┌──────────────────────────────────────┐
+   │                                      │
+   │   ●  ●                               │ ← 4-pin pocket
+   │  ┌────────────────────┐              │   (Ø4 mm pins)
+   │  │                    │              │
+   │  │   HEAD STOCK       │   ← 100 × 50 mm   for long-face flips
+   │  │                    │              │
+   │  └────────────────────┘              │
+   │   ●  ●                               │
+   │   ↑                                  │
+   │ Anchor 1                             │
+   └──────────────────────────────────────┘
+```
+
+For the **strike-face flips** (head stood on end, 50 × 50 footprint
+on the bed): the same 4 pins relocated into a 50×50 pattern, or use
+2 pins on the back + a side toe-clamp.
+
+## Stock prep — out of scope of CAM, done before mounting
+
+| Stock | Spec | Pre-CNC prep |
+|---|---|---|
+| Head | 7075 aluminium, 100 × 50 × 50 mm | Saw to size + light deburr. The CNC will not face the blank; arrives at final outer dimension. |
+| Handle | American white oak, 50 × 30 × 300 mm | Saw to size; verify squareness on a try-square — handle relies on the back face being flat for vise registration. |
+
+> Both pieces are **near net size** going onto the machine — there's
+> ≤ 1–2 mm of stock to remove on the outer profile. This is by design:
+> "no facing the blank" is one of the project's safety rules.
 
 ## CAM safety rules — pulled from arc-reactor / project 01
 
@@ -207,14 +311,21 @@ projects/02-decorative-hammer-mjolnir/
    - File-level validation pass
    - Documented in this CAM_PLAN.md before moving to the next.
 
-## Open questions for the user (when convenient)
+## References
 
-1. Do you have the **Carvera Air bed plate dimensions** + dowel-pin
-   hole layout documented somewhere I can reference? (Or do you want
-   me to design a fixture plate from scratch?)
-2. Do you prefer **`splitFile = tool`** (one .cnc per tool) or
-   **`splitFile = none`** (one big file per setup)? Project 01 used
-   `none` for roughing.
-3. **Resin colour for the engraving fill** — black is in the brief,
-   but if you want a different colour (white, gold, copper) for the
-   handle vs the head, the engraving DOC can be tuned per surface.
+- [Carvera Air work area + bed specs (Makera product page)](https://www.makera.com/products/carvera-air)
+- [Carvera Air MDF bed (Makera replacement part)](https://www.makera.com/products/carvera-air-mdf-bed)
+- [Saunders fixture/tooling plate dimensions](https://saundersmachineworks.com/products/makera-carvera-air-fixture-tooling-plate)
+- [Makera Wiki — Tool Kit + manual probe procedure](https://wiki.makera.com/en/carvera/manual/tool-kit)
+- [arc-reactor docs/makera-carvera-cam-notes.md — local CAM safety rules + post properties](file:///C:/projects/arc-reactor/docs/makera-carvera-cam-notes.md)
+- [Project 01 lessons-learned.md — feeds-and-speeds calibration story](../../01-relief-pear-150x150x45/lessons-learned.md)
+- [Project 01 VALIDATION_REPORT.md — first-article validation pattern](../../01-relief-pear-150x150x45/documentation/VALIDATION_REPORT.md)
+
+## Decisions taken
+
+- **`splitFile = tool`** for project 02 (one `.cnc` per tool). Easier
+  to inspect each program in isolation; project 01 used `none` because
+  it was a single roughing pass.
+- **Resin fill conversation deferred** — that's a post-CAM step; the
+  CAM-time decision is just engraving DOC, which is locked at 0.15 mm
+  for the metal V-bit (sufficient for any resin).
