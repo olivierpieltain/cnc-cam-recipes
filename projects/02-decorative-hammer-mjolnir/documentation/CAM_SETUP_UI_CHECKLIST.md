@@ -70,6 +70,44 @@ orientations to expose each face.
 | **A5 — Strike face +X up** | +X face of the head (50 × 50 face with Helm-of-Awe) | the head's other 50 mm direction |
 | **A6 — Strike face -X up** | -X face (mirror of A5) | same |
 
+## Why the UI step (not API) — definitive answer
+
+The Fusion 360 Python API doesn't expose a working path to bind a
+face/edge to a CAM Setup's WCS orientation axis. Tested extensively
+during this project (May 2026):
+
+| Approach | Result |
+|---|---|
+| `param.expression = entityToken` | ❌ accepted but reads back `"false"` |
+| `param.expression = "true"` | ❌ same |
+| `param.value.value.push_back(face_or_edge)` | ❌ size goes 0→1 in memory but rolls back to 0 on save |
+| `setup.workCoordinateSystem = matrix` | ❌ property is read-only |
+| `Component.constructionCoordinateSystems` | ❌ class doesn't exist in `adsk.fusion`/`adsk.core`/`adsk.cam` |
+| Switch to parametric (`design.designType = 1`) | ✓ works but `constructionCoordinateSystems` still doesn't exist |
+| `Selections.Set <path>` (text command) | ✓ sets UI selection but doesn't propagate to params |
+| `Setup.SetWCS …` (text command) | ❌ no such command |
+
+After a UI WCS click, the API can read the result. Specifically:
+
+```python
+setup = next(s for s in cam.setups if s.name == 'H1_HANDLE_SIDE_PY')
+mode = setup.parameters.itemByName('wcs_orientation_mode').expression
+axisZ_expr = setup.parameters.itemByName('wcs_orientation_axisZ').expression
+axisZ_size = setup.parameters.itemByName('wcs_orientation_axisZ').value.value.size()
+m = setup.workCoordinateSystem
+print(f'mode={mode}  axisZ.expr={axisZ_expr}  axisZ.size={axisZ_size}')
+for r in range(4):
+    print([round(m.getCell(r, c), 3) for c in range(4)])
+```
+
+After the UI click, `mode` becomes `'axesXZ'`, `axisZ.expr` becomes
+`'true'`, `axisZ.size` becomes 1, and the matrix reflects the new
+orientation. **This is how I'll verify each setup once you're done.**
+
+Long-term reference: this finding is also saved as
+`memory/fusion_cam_wcs_api_limitation.md` in the user's permanent
+Claude memory so future sessions don't re-do the same investigation.
+
 ## Confirmation step before API takes over
 
 After you've configured all 11 setups, ping me in the chat with
