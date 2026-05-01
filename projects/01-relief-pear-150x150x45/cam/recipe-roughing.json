@@ -1,0 +1,59 @@
+{
+  "name": "pear-3175-flat-roughing-adaptive",
+  "version": 1,
+  "machine_floor": {
+    "min_envelope_mm": [360, 240, 140],
+    "min_spindle_W_continuous": 200,
+    "min_spindle_RPM": 15000,
+    "rigidity": "small-format desktop CNC (Carvera Air-class or better)"
+  },
+  "material": "pear (medium hardwood, density ~700 kg/m^3, Kc ~5 N/mm^2). Most other medium hardwoods (cherry, walnut, beech) work with the same numbers; for soft wood scale feeds up ~30%, for hard wood (oak, maple) scale stepdown down ~20%.",
+  "tool": {
+    "diameter_mm": 3.175,
+    "type": "flat endmill",
+    "flutes": 2,
+    "flute_length_mm": 42,
+    "geometry_notes": "Single-flute is fine too — halve chipload check. Long-flute (42mm) tools deflect; recipe leaves 0.5 mm stock for finishing to absorb the deflection."
+  },
+  "operation": "adaptive_roughing",
+  "params": {
+    "tolerance_mm": 0.1,
+    "maximumStepdown_mm": 1.5,
+    "optimalLoad_mm": 0.5,
+    "fineStepdown_mm": 0.6,
+    "stockToLeave_mm": 0.5,
+    "useStockToLeave": true,
+    "useRestMachining": "true_for_subsequent_slabs_only",
+    "flatAreaMachining": false,
+    "boundaryMode": "none",
+    "rampType": "helix",
+    "rampClearanceHeight_mm": 2.5,
+    "direction": "climb",
+    "tool_feedCutting_mm_min": 430,
+    "tool_feedPlunge_mm_min": 60,
+    "tool_feedRamp_mm_min": 150,
+    "tool_spindleSpeed_RPM": 13000
+  },
+  "reasoning": {
+    "tolerance_mm": "0.1 mm is the standard wood-roughing balance: tighter than this just slows toolpath generation without practical benefit (finishing pass holds the real tolerance).",
+    "maximumStepdown_mm": "1.5 mm = 47% of tool diameter. Stays well below 1xD which is the usual aggressive-but-safe ceiling for a hardwood roughing pass with a long-flute 1/8\" tool. Drop to 1.0 mm for hard woods (oak, maple).",
+    "optimalLoad_mm": "0.5 mm radial = 16% of tool diameter. Adaptive's strength is high DOC + low WOC; this keeps spindle load comfortably within the 200 W continuous budget (~38 W actual) and leaves headroom for tool dulling. Bump to 0.8 mm if your machine has 500 W+.",
+    "fineStepdown_mm": "0.6 mm. The interleaved-fine-pass distance Fusion uses when flatAreaMachining = true. We disable flat-area so this only matters on rest passes — keep at 0.6 mm or larger.",
+    "stockToLeave_mm": "0.5 mm. The flat finishing pass takes 0.1 mm and the 3D finish takes the remaining 0.4 mm. With a 13xD long flute the tool deflects under load — 0.5 mm absorbs it.",
+    "flatAreaMachining": "DISABLED. Adaptive is for bulk material removal — a horizontal flat-floor rework op is the right tool for flats and runs faster than adaptive's redundant fine-stepdown passes.",
+    "boundaryMode": "none. Adaptive uses the stock body's outline as its outer limit. This guarantees the 2-3 mm strip between the model bounds and the stock edge is fully roughed.",
+    "rampType": "helix. Center-cutting end-mills can plunge straight, but helix is gentler and works on non-center-cutting tools too.",
+    "tool_feedCutting_mm_min": "430 mm/min @ 13000 RPM, 2 flutes -> chipload 0.0165 mm/tooth. Low end of pear's window (0.025-0.05). Conservative for the Carvera Air's spindle and a 13xD long tool. Bump to 600 mm/min for a more rigid machine.",
+    "tool_spindleSpeed_RPM": "13000 RPM. The Carvera Air's spindle peaks at 15000 RPM; running near peak shortens bearing life. 13000 is a comfortable cruise."
+  },
+  "verification": {
+    "MRR_mm3_min": 322,
+    "spindle_power_required_W": 38,
+    "spindle_power_budget_W": 140,
+    "chipload_mm_per_tooth": 0.0165
+  },
+  "see_also": [
+    "docs/feeds-and-speeds.md (the math)",
+    "docs/safety-rules.md (validation checklist)"
+  ]
+}

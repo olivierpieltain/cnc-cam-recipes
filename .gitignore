@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+.pytest_cache/
+
+# Fusion 360 auto-backups (we DO want to commit .f3d source designs)
+*.f3z
+.thumbs/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Local scratch
+*.tmp
+*.bak
+*.log
+scratch/
