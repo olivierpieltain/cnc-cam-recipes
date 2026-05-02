@@ -129,8 +129,8 @@ as the bed-Y reference depending on which orientation the stock is in.
 | Probe Z0 | top of stock = body +X face (post-prep at body X = +14.5), 30 mm above bed |
 | Hold-down | toe-clamps on the tab tops |
 | WCS | bed +Z = body +X, bed +X = body +Z, bed +Y = body -Y |
-| Operations (current) | T1 outer profile contour, T3 V-bit engrave on +X face |
-| **Operations to add (UI)** | **T4 wedge kerf** (1.5 mm flat, helical entry, full-width slot, depth -15 mm); T2 R6 fillets on this face's two long edges; T2 R5 pommel-edge fillet on this face |
+| Operations (current) | T1 outer profile contour, T8 V-bit engrave on +X face, T2 fillet finish |
+| **Wedge kerf — NOT in CAM, hand-saw only** | The kerf is on body +Z end face (sketch `WEDGE_KERF` lives on world Z=240 plane, normal +Z). Cut direction is parallel to handle long axis, requiring body +Z = WCS +Z (handle vertical). 240 mm vs 130 mm Z envelope — doesn't fit. Hand-saw with a Japanese pull-saw post-CNC. See [CAM_PLAN.md](CAM_PLAN.md) → Simplification backlog item 3 for the full rationale. |
 
 ## H1 — Side A (+Y face up, bust side, rotate 90° from H3)
 

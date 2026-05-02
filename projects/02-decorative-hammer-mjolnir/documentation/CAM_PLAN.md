@@ -293,6 +293,175 @@ be done with the picker.
 
 ---
 
+## Operator runbook (full sequence, including off-machine work)
+
+Single source of truth for the human steps from raw stock to finished
+hammer. Works alongside [FIXTURING_AND_ROTATION.md](FIXTURING_AND_ROTATION.md)
+for the per-setup mount details.
+
+### Phase 0 — pre-CNC prep (off-machine, one-time)
+
+| # | Step | Tool / spec | Why |
+|---|---|---|---|
+| 0.1 | Saw oak handle blank to 50 × 30 × 300 mm | Table saw | Body is 240 mm, leaves 30 mm tab at each end for fixturing + tab removal post-CNC. |
+| 0.2 | End-square both ends of the handle blank | Table saw or mitre saw | The squared end is the X-pin reference at Anchor 1; out-of-square here propagates to every flip. |
+| 0.3 | Saw aluminium head blank to 100 × 50 × 50 mm 7075 | Bandsaw / chop saw | Near net size — CAM does not face the blank. |
+| 0.4 | Light-deburr the alu blank | Hand file | Removes saw burr that would interfere with corner-against-pin registration. |
+| 0.5 | Verify squareness on a try-square | Try-square | Hard-stop: if a face is out of square, refuse to mount — re-saw or use a different blank. |
+| 0.6 | Carvera Air bed — Anchor 1 pins installed (Ø4 mm × 8 mm standoffs) | Makera anchor kit | The pins are the project's reference datum. |
+| 0.7 | XYZ probe + tool-length probe wired up and tested | Carvera probe set, 3.175 mm test rod | Probe sets Z0 each setup; tool-length probe handles ATC. |
+| 0.8 | Tool library loaded: T1, T2, T6, T8, T9, T10 (T3/T4/T5/T7 not used) | Makera Carvera Tools v1.4.0 | T7 dropped in audit; T3/T4/T5 unused but library entries fine to leave. |
+| 0.9 | Air assist plumbed and on (M7) | Carvera air kit | Project safety rule, both materials. |
+
+### Phase 1 — first machine work (handle PREP face-mills)
+
+Run order: `H0a → H0b → H0c → H0d`. Single tool (T1) across all four;
+ATC handles tool changes if any (none expected within phase 1).
+
+For each of `H0a..H0d`:
+
+1. Lift stock, rotate 90° about long axis, present new flank face up.
+2. Lower-left corner against Anchor 1 pins.
+3. Toe-clamp on tab area (never on the face being machined).
+4. XYZ-probe Z0 on top of stock (3.175 mm test rod).
+5. Apply printed `X Offset` / `Y Offset` from `.cnc` header to G54 manually
+   (see [Simplification backlog](#simplification-backlog) item 1 — proposal
+   to automate this).
+6. Run `H0a_01_T1_FACE_PY.cnc` (or H0b/H0c/H0d as appropriate).
+
+After all four PREP setups, every long flank is flat → repeatable
+Anchor-1 lateral registration in the H1–H4 setups.
+
+### Phase 2 — handle main machining
+
+Run order: `H4 → H3 → H1 → H2`. Mount-chain-optimized so each flip
+exposes a face that the previous setup didn't deeply machine.
+
+For each of H4/H3/H1/H2: same per-setup workflow as phase 1 (re-mount,
+re-probe Z0, dial G54 X/Y, run files). Run `<setup>_01..NN.cnc` in
+numeric order; ATC handles tool changes.
+
+H1 has 8 files (most ops); H2 has 7 (no Odin V-carve on the back side);
+H3 and H4 have 3 each.
+
+### Phase 3 — head main machining
+
+Run order: `A1 → A2 → A3 → A4 → A5 → A6`. The head re-fixtures off
+Anchor 1 with a different stock footprint per setup type:
+- A1, A2 (±Z up, eye access): 100 × 50 footprint on bed
+- A3, A4 (±Y up, long faces): 100 × 50 footprint on bed
+- A5, A6 (±X up, strike faces): 50 × 50 footprint on bed
+
+A1 has a known gap: `A1_01_T8_CHAMFER_5MM.cnc` is intentionally absent
+until the chamfer chain is re-picked in Fusion UI. Skip A1_01 and run
+A1_02 + A1_03; chamfer the +Z face by hand if not yet restored, OR
+restore the op in UI before milling.
+
+### Phase 4 — post-CNC hand finishing
+
+| # | Step | Tool | Notes |
+|---|---|---|---|
+| 4.1 | Band-saw / hand-saw the 30 mm sacrificial tabs at each end of the handle | Bandsaw or pull-saw | Cut at design Z=0 and Z=240. Sand the cut faces flush. |
+| 4.2 | Hand-saw the wedge kerf at top of tenon | Japanese pull-saw, ~1.5 mm kerf | 22 mm wide × 14 mm deep slot, centred on body Y axis at body Z=240. Geometric constraint: the kerf is on the body +Z end face; horizontal mount can't reach it with a vertical spindle, and the 240 mm handle doesn't fit standing on end (130 mm Z envelope). |
+| 4.3 | Hand-deburr the eye edges (top + bottom of head) | Hand file or scraper | Fusion `chamfer2d` failed on those inner pocket edges; sharp from CNC. See backlog item 2 for a CAM alternative worth trying. |
+| 4.4 | Resin-fill the V-bit engravings | Black resin, scraper | Decorative blackwash for contrast on medallions / runes / inscriptions, both materials. |
+| 4.5 | Light hand-sanding of the oak handle | 220 → 320 grit | Optional; Odin bust + fillets already get a 1.5 mm-ball finish pass, but oak benefits from a final sand. |
+| 4.6 | Final assembly | Mallet + wedge | Drive the head onto the tenon, drive the wedge into the kerf to lock it. |
+
+---
+
+## Simplification backlog
+
+Documented but **not yet executed** — these would reduce the manual
+work in the runbook. Each is independent; pick by leverage / risk
+appetite.
+
+### 1. Automate G54 from posted `.cnc` (post-processor mod) — high leverage
+
+**Today's pain**: every setup, the operator reads `( X Offset : 30. mm )`
+/ `( Y Offset : 31.5 mm )` from the `.cnc` header and types the values
+into G54 manually on the controller. 14 setups × 2 axes = 28 manual
+typings; one wrong digit late in the run is a scrap part.
+
+**Proposed change**: fork the Carvera v1.4.3 community post into
+`projects/02-decorative-hammer-mjolnir/posts/Carvera_v1.4.3_g54auto.cps`
+and emit a `G10 L20 P1 X<x> Y<y>` line at program start, before the
+first move, in addition to (or instead of) the comment. The Carvera
+firmware is Smoothieware-derived and supports G10 L20 P-word for
+setting WCS offsets. Re-post all 38 ops with the project-local post
+path so the change is contained — the global AppData post stays
+untouched and other projects (arc-reactor) are unaffected.
+
+**Risk**: medium. A wrong G10 L20 emission on the wrong WCS could
+silently shift every cut by the offset amount. Validate by:
+- Posting one op, diffing against the v1.4.3 output, eyeballing the
+  G10 line.
+- Dry-run with the spindle off, just watch the DRO snap to the
+  expected WCS values.
+- Run H0a (the 0.5 mm face-mill) first as a sacrificial test — if
+  the offset is wrong, the worst case is air-cutting or shallow
+  scoring of a tab.
+
+**Effort**: ~1 hour. Save: 14 manual offset entries + lower error
+rate.
+
+### 2. CAM the eye-edge chamfer (sketch-driven, not edge-driven) — medium leverage
+
+**Today's pain**: A1 + A2 eye edges are sharp from CNC. The
+`chamfer2d` strategy fails silently on the inner pocket edges
+(saved memory `fusion_cam_chamfer2d_silent_fail.md`). Hand-deburr
+with a file works but is tedious and uneven.
+
+**Proposed change**: add a `contour2d` op driven by a sketched
+ellipse / racetrack inset ~1 mm from the eye perimeter, on the head's
++Z face (and -Z face for A2). Tool T8 (90° chamfer bit), bottom
+−1.5 mm relative to top face, single pass. The sketch geometry
+sidesteps the BRepEdge selection that's failing.
+
+**Risk**: low. New op, cleanly suppressed if it doesn't generate.
+No effect on existing ops.
+
+**Effort**: ~15 min experiment in Fusion UI. Save: one hand-finish
+step per side (×2).
+
+### 3. Wedge kerf in CAM — NOT FEASIBLE (clarification)
+
+A previous audit pass speculated the kerf was "now possible thanks
+to horizontal mount". Geometric re-check (sketch `WEDGE_KERF` is
+on world Z=240 plane, normal +Z; the slot is 22 × 1.5 mm on the
+body's top end face, opening down into body −Z over 14 mm):
+
+- The cut direction is body +Z → body −Z, i.e., parallel to the
+  handle long axis.
+- For a vertical-spindle 3-axis machine, the cut direction must be
+  WCS Z; that means body +Z = WCS +Z, i.e., handle standing on end
+  with the tenon facing the spindle.
+- 240 mm handle vs 130 mm Carvera Air Z envelope — doesn't fit. A
+  cantilevered overhang mount (handle hanging off the bed edge) is
+  technically possible but introduces vibration and clearance risk
+  on a decorative project. Not worth it.
+
+**Decision: stays hand-saw.** The runbook's phase 4.2 step is
+correct; no CAM op to add.
+
+### 4. Print a flip fixture for the handle — medium leverage, separate effort
+
+**Today's pain**: each H1–H4 mount requires eyeballing the lower-left
+corner against Anchor 1 pins + toe-clamping. Repeatable but slow,
+and a slight shift between flips will show up as a step on the long
+faces.
+
+**Proposed change**: design + 3D-print a low-profile cradle with
+the 50 × 30 cross-section pocketed in, indexed off Anchor 1 pin
+positions. Drop stock in, toe-clamp on the tab, done.
+
+**Risk**: low (only changes mount procedure, not CAM).
+
+**Effort**: ~1 hour CAD + ~2 hour print. Save: faster flips, less
+"did it shift?" doubt, more consistent finish on the long faces.
+
+---
+
 ## Original plan (as of 2026-05-01, kept for reference)
 
 > This was the planning step before any Fusion CAM operations existed.
