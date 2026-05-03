@@ -84,10 +84,15 @@ collet without changes.
   edge / wing-line / eye-detail shadows. Switch to 30° × 0.2 mm only if
   your relief has tighter internal corners (more fragile tip, sharper
   angles reachable).
-- **Final contour trim** uses **T1** again — no extra tool — to outline
-  the 146 × 146 relief silhouette at full stock depth (Z = 0 → −40.3 mm
-  including 0.3 mm into a sacrificial spoilboard) and free the part
-  from the surrounding 2 mm border of stock.
+- **Final perimeter clearing** uses **T1** again — no extra tool — but
+  with **adaptive** strategy (cloned from op 01A's settings) so it
+  follows the **actual relief silhouette curves**, not a perfect
+  rectangle. It clears the 2 mm border between the silhouette and the
+  stock perimeter, from Z = −35 mm (where roughing/finishing left off)
+  down to Z = −45.3 mm — through the bottom 10 mm of the 45 mm physical
+  stock plus 0.3 mm into a sacrificial spoilboard. This frees the
+  finished part with a clean vertical wall whose outline matches the
+  3D relief above.
 
 ## Operation order
 
@@ -100,7 +105,7 @@ collet without changes.
 | 03 | `03_…_FINITION_RELIEF_BOULE_3175x22` | parallel | **T2** | [`pear-3175-ball-finishing-main`](../../recipes/pear-3175-ball-finishing-main.json) | main 3D finish |
 | 04 | `04_…_FINITION_DETAIL_REPRISE_BOULE_2x17_CROSSHATCH` | parallel + rest, `passAngle=90°` (cross-hatched against op 03) | **T3** Ø2.0 × 17 mm flute | [`pear-2mm-ball-finishing-detail-rest`](../../recipes/pear-2mm-ball-finishing-detail-rest.json) | clean what T2 couldn't reach. Cross-hatch (90° from op 03) catches detail in both directions. |
 | 05 | `05_…_FINITION_PENCIL_VBIT_60deg` *(suppressed)* | pencil | **T4** (60° V-bit) | (defaults) | would sharpen inside corners — but **suppressed** in the current Fusion file: the relief STL has 1.46M triangles, well past Fusion's pencil edge-filter feasibility. Decimate the mesh to ~100k tri (Mesh → Reduce) before un-suppressing. |
-| 06 | `06_…_CONTOUR_DECOUPE_PERIMETRE_3175x42` | 2D contour | **T1** (back) | (built inline — full-depth outer trim around 146 × 146 silhouette) | free part from 2 mm stock border |
+| 06 | `06_…_CONTOUR_ADAPTIVE_3175x42_FROM_Z-35_TO_Z-45.3` | adaptive (cloned from op 01A) | **T1** (back) | (defaults from op 01A, Z range overridden to −35 … −45.3) | clears the 2 mm border around the actual relief silhouette (asymmetric — wraps horns / figural curves), Z=−35 → −45.3 (through bottom 10 mm of 45 mm stock + 0.3 mm spoilboard); frees the part |
 
 ## How to adapt this to your machine
 
@@ -196,50 +201,75 @@ reliefs with mixed-orientation detail — comparable to what pencil
 would have added for inside corners, but spread across the whole
 surface. Cycle time is unchanged vs a same-direction rest pass.
 
-### About op 06 (perimeter contour trim)
+### About op 06 (perimeter clearing — adaptive)
 
-Op 06 is the final operation. It cuts a 2 mm-wide trench around the
-146 × 146 relief silhouette from Z = 0 to Z = −40.3 mm — through the
-full 40 mm stock plus 0.3 mm into a sacrificial spoilboard. This frees
-the relief from the surrounding stock border that adaptive roughing
-left in place beneath the relief depth.
+Op 06 is the final operation. It uses **adaptive** strategy, cloned
+from op 01A, so it follows the **actual relief silhouette curves**
+(asymmetric — wraps around horns and figural projections) rather than
+cutting a perfect rectangle. It clears the 2 mm border between the
+silhouette and the stock perimeter, going from Z = −35 mm (the floor
+of the carved relief, where roughing/finishing left off) down to
+Z = −45.3 mm — through the bottom 10 mm of the 45 mm physical stock
+plus 0.3 mm into a sacrificial spoilboard. The result is a finished
+part with a clean vertical wall whose outline matches the 3D relief
+above.
+
+**Why adaptive instead of 2D contour:** a 2D contour at the 146 × 146
+silhouette square cuts the same line on all four sides regardless of
+what the relief is doing on each side at that Z slice. A figural relief
+has horns / curves / inset areas — its actual silhouette is not a
+perfect square. Adaptive uses the relief mesh as a "part to keep"
+model and walks the contour at each Z, hugging the silhouette wherever
+it goes. The resulting part outline is asymmetric and matches the
+relief's top profile exactly. Symmetry between the relief shape on top
+and the cut wall on the side comes for free.
 
 **Required for op 06**:
 - A sacrificial spoilboard under the part (the bit goes 0.3 mm into it).
 - Heavy double-sided tape on the entire bottom of the blank (no
   fixturing — clamps would interfere with the perimeter cut). Tape must
-  hold the part AND the four 2 mm × 5 mm × 150 mm strips that get
-  freed in the final passes.
-- Conservative parameters are already set: 0.75 mm stepdown (8 passes),
-  400 mm/min cut feed, 100 mm/min plunge, single-direction climb on the
-  air side / conventional on the part side (force pushes outward away
-  from part — gentle on tape grip).
+  hold the part AND any small offcuts that get freed in the final
+  passes.
+- Adaptive's tool path goes ~3 mm past the stock perimeter in places
+  (lead-in / engagement). Mount with ≥ 5 mm clearance on every side.
 
 ## Hard constraints
 
-- **Z lowest cut:** −40.3 mm (op 06 contour trim through full stock +
-  0.3 mm into spoilboard). For ops 01–05 the lowest cut is −35 mm
-  (relief depth). Validator: `--max-depth 35` for ops 01–05,
-  `--max-depth 41` for op 06.
+- **Z lowest cut:** −45.3 mm (op 06 perimeter clearing through bottom
+  10 mm of the 45 mm physical stock + 0.3 mm into spoilboard). For
+  ops 01–05 the lowest cut is −35 mm (relief depth). Validator:
+  `--max-depth 35` for ops 01–05, `--max-depth 46` for op 06.
 - **XY excursion:** within roughly `0,0` → `150,150` ± tool radius
   (~1.6 mm). Adaptive deliberately overshoots the stock outline by a
-  tool-radius at boundaries. Op 06 lead-in/out also goes ~0.5 mm past
-  the stock edge in air. Mount with ≥ 5 mm clearance on every side.
+  tool-radius at boundaries — op 06 in particular reaches ~3 mm past
+  the stock edges. Mount with ≥ 5 mm clearance on every side.
 - **T1 flute length:** 42 mm. Max engaged depth must be ≤ 42 mm. Op 06
-  engages 5.3 mm of cut depth (Z = −35 → −40.3) starting from above
+  engages 10.3 mm of cut depth (Z = −35 → −45.3) starting from above a
   cleared roughing zone — well within reach.
+- **Stock model vs reality:** Fusion's setup stock is 40 mm thick
+  (`stock40` in the doc name) but the physical stock after planing is
+  45 mm. Ops 01–05 don't touch the bottom 10 mm so this discrepancy
+  doesn't affect them. Op 06's `bottomHeight` is set to −45.3 mm
+  absolute (5.3 mm below Fusion's stock-model bottom, 0.3 mm into the
+  spoilboard) so the cut actually goes through the physical stock.
 - **T2 reach:** 22 mm flute on a 1/8" shank. Reaches 22 mm into the
   relief; deeper background is the roughing leftover (acceptable —
   relief background is usually flat).
 - **T3 reach:** Ø2.0 × **17 mm** flute is the version the user physically
-  owns and what the Fusion file is configured for. The recipe
+  owns. The recipe
   ([`pear-2mm-ball-finishing-detail-rest.json`](../../recipes/pear-2mm-ball-finishing-detail-rest.json)) was originally tuned for a
   12 mm flute (stiffer, less deflection), but the Makera library only
-  has 12 mm and the boxed kit's only Ø2 ball is the 17 mm version. The
-  Fusion T3 tool was re-edited to flute=17 mm to match physical reality.
-  Expect slightly more deflection than the recipe nominally allows —
-  scale the Carvera feed-override down if it chatters. Broken Ø2 mm bits
-  are easy, so be conservative on entry the first time.
+  ships 12 mm and the boxed kit's only Ø2 ball is the 17 mm version.
+  Modifying the library tool inline does NOT persist — Fusion reverts
+  on every load. The reliable fix is a **separate custom tool**: the
+  script [`cam/create_t3_17mm_tool.py`](cam/create_t3_17mm_tool.py)
+  clones the Makera 2*12mm into a new tool definition (its own GUID,
+  description "2 Flute Ball Nose 2*17mm (Olivier physical)") in a new
+  Local > Custom library, and op 04 references that custom tool — the
+  assignment persists. Expect slightly more deflection than the recipe
+  nominally allows — scale the Carvera feed-override down if it chatters.
+  Broken Ø2 mm bits are easy, so be conservative on entry the first
+  time.
 - **T4 V-bit fragility:** 0.1 mm tip carbide. Plunge feed kept at
   50 mm/min. Don't override on the machine. A snapped tip can pull
   fibres out of the relief surface.
