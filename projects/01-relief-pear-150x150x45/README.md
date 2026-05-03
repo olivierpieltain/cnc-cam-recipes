@@ -233,7 +233,7 @@ left in place beneath the relief depth.
   relief background is usually flat).
 - **T3 reach:** Ø2.0 × **17 mm** flute is the version the user physically
   owns and what the Fusion file is configured for. The recipe
-  (`recipe-finishing-detail-rest.json`) was originally tuned for a
+  ([`pear-2mm-ball-finishing-detail-rest.json`](../../recipes/pear-2mm-ball-finishing-detail-rest.json)) was originally tuned for a
   12 mm flute (stiffer, less deflection), but the Makera library only
   has 12 mm and the boxed kit's only Ø2 ball is the 17 mm version. The
   Fusion T3 tool was re-edited to flute=17 mm to match physical reality.
